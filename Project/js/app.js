@@ -1,7 +1,5 @@
 'use strict';
 
-
-
 var map;
 // FourSquare keys
 var clientID = "LNIAGQRXCOHRU0NUYS50R2KQC1SVITFKR1YRFXQ0XC5DOSHZ";
@@ -10,32 +8,32 @@ var versionDate = "20170116";
 
 var Venues = function(data) {
     var self = this;
-    this.Name = data.Name;
-    this.Address = "";
-    this.Number = "";
-    this.Lat = data.Lat;
-    this.Lng = data.Lng;
+    this.restaurantName = data.restaurantName;
+    this.address = "";
+    this.number = "";
+    this.lat = data.lat;
+    this.lng = data.lng;
     this.visible = ko.observable(true);
 
-    var fourSquareUrl = "https://api.foursquare.com/v2/venues/search?client_id=" + clientID + "&client_secret=" + clientSecret + "&v=" + versionDate + "&ll=" + this.Lat + "," + this.Lng + ",&query=" + this.Name;
+    var fourSquareUrl = "https://api.foursquare.com/v2/venues/search?client_id=" + clientID + "&client_secret=" + clientSecret + "&v=" + versionDate + "&ll=" + this.lat + "," + this.lng + ",&query=" + this.restaurantName;
 
     $.getJSON(fourSquareUrl).done(function(data) {
         var info = data.response.venues[0];
-        self.Address = info.location.formattedAddress;
-        self.Number = info.contact.formattedPhone;
+        self.address = info.location.formattedAddress;
+        self.number = info.contact.formattedPhone;
     });
 
-    this.contentString = "<div class='infoWindow'><div class='name'>" + data.Name + "</div>" + "<div class='info'>" + self.Address + "</div>" +
-        "<div class='info'>" + self.Number + "</div></div>";
+    this.contentString = "<div class='infoWindow'><div class='restaurantName'>" + data.restaurantName + "</div>" + "<div class='info'>" + self.address + "</div>" +
+        "<div class='info'>" + self.number + "</div></div>";
 
     this.infoWindow = new google.maps.InfoWindow({
         content: self.contentString
     });
 
     this.marker = new google.maps.Marker({
-        position: new google.maps.LatLng(self.Lat, self.Lng),
+        position: new google.maps.LatLng(self.lat, self.lng),
         map: map,
-        title: data.Name
+        name: data.restaurantName
     });
     this.showMarker = ko.computed(function() {
         if (this.visible() === true) {
@@ -47,9 +45,9 @@ var Venues = function(data) {
     }, this);
 
     this.marker.addListener('click', function() {
-        self.contentString = '<div class="infoWindow"><div class="name"><b>' + data.Name + "</b></div>" +
-            '<div class="info">' + self.Address + "</div>" +
-            '<div class="info">' + self.Number + '</div></div>';
+        self.contentString = '<div class="infoWindow"><div class="restaurantName"><b>' + data.restaurantName + "</b></div>" +
+            '<div class="info">' + self.address + "</div>" +
+            '<div class="info">' + self.number + '</div></div>';
 
         self.infoWindow.setContent(self.contentString);
 
@@ -69,19 +67,19 @@ var Venues = function(data) {
 // var viewModel = {
 // 		venues:
 // 		[{
-// 			Name: 'Utah State Capitol',
+// 			restaurantName: 'Utah State Capitol',
 // 			address: "Test address street road",
 // 			url: "www.website.com",
 // 			number:"404-404-4404"
 // 		},
 // 		{
-// 			Name: "Red Butte Trail",
+// 			restaurantName: "Red Butte Trail",
 // 			address: "Test address street road",
 // 			url: "www.website.com",
 // 			number:"404-404-4404"
 // 		},
 // 		{
-// 			Name:"Sean's house",
+// 			restaurantName:"Sean's house",
 // 			address:"Sean's address",
 // 			url: "seanpsampson.com",
 // 			number: "404-404-4404"
@@ -106,7 +104,7 @@ var Venues = function(data) {
 // this.infoWindow = new google.maps.InfoWindow({content: self.content});
 //
 // this.marker = new google.maps.Marker({
-// 		//Marker Stuff here.  Name, position, etc.
+// 		//Marker Stuff here.  restaurantName, position, etc.
 // });
 
 
@@ -128,9 +126,9 @@ var Venues = function(data) {
 // 	this.mapElem.style.height = window.innerHeight - 50;
 //     }
 var allVenues = [{
-    Name: "Pago",
-    Lat: 40.750139,
-    Lng: -111.865595
+    restaurantName: "Pago",
+    lat: 40.750139,
+    lng: -111.865595
 }];
 
 function viewModel() {
@@ -157,7 +155,7 @@ function viewModel() {
             return self.modelArray();
         } else {
             return ko.utils.arrayFilter(self.modelArray(), function(venue) {
-                var string = venue.Name.toLowerCase();
+                var string = venue.restaurantName.toLowerCase();
                 var result = (string.search(filter) >= 0);
                 venue.visible(result);
                 return result;
@@ -165,12 +163,11 @@ function viewModel() {
         }
     }, self);
 
-    this.mapElem = document.getElementById('map');
-    this.mapElem.style.height = window.innerHeight - 50;
+
     // self.searchResults = ko.computed(function() {
     //     var q = self.Query();
     //     return self.modelArray.forEach.filter(function(i) {
-    //       return i.Name.toLowerCase().indexOf(q) >= 0;
+    //       return i.restaurantName.toLowerCase().indexOf(q) >= 0;
     //     });
     //   });
 

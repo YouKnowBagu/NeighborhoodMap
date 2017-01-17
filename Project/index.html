@@ -7,19 +7,23 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-        <input class="form-control" name="q" data-bind="value: Query, valueUpdate: 'keyup'" autocomplete="off">
-        <div class="infoWindow"></div>
-        <h3>Search results:</h3>
-        <ul data-bind="foreach: filteredList">
-            <li data-bind="text: Name"></li>
-        </ul>
-
-        <h3>All items:</h3>
-        <ul data-bind="foreach: modelArray">
-            <li data-bind="text: Name"></li>
-        </ul>
-        <div class="map" id="map"></div>
-
+        <div class="body-container">
+            <aside>
+                <input class="form-control" name="q" data-bind="value: Query, valueUpdate: 'keyup'" autocomplete="off">
+                <h3>Search results:</h3>
+                <ul data-bind="foreach: filteredList">
+                    <li data-bind="text: restaurantName"></li>
+                </ul>
+                <h3>All items:</h3>
+                <ul data-bind="foreach: modelArray">
+                    <li data-bind="text: restaurantName"></li>
+                </ul>
+            </aside>
+            <section>
+                <div class="map" id="map"></div>
+                <div class="infoWindow"></div>
+            </section>
+        </div>
         <script src='js/knockout.min.js'></script>
         <script src='js/jquery.min.js'></script>
         <script src='js/app.js'></script>
