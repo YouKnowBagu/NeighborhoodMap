@@ -3,11 +3,10 @@ body {
     height: 100%;
     width: 100%;
 }
-.body-container {
+.container {
     height: 100vh;
     width: 100vw;
     display: flex;
-    flex-shrink: 0;
     position: relative;
     overflow: hidden;
     justify-content: space-between;

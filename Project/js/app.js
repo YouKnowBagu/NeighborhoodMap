@@ -68,7 +68,10 @@ var Venues = function(data) {
         if (info.contact.formattedPhone !== undefined) {
         self.number = info.contact.formattedPhone;
     };
-    });
+    })
+        .fail(function() {
+            alert("Error retrieving FourSquare information.  Please refresh the page to try again.")
+        });
 
     this.infoWindow = new google.maps.InfoWindow({
     });
@@ -93,9 +96,10 @@ var Venues = function(data) {
             self.marker.setAnimation(null);
         }, 2100);
     });
-
-    this.bounce = function(place) {
+    //When clicking on list item, bounce appropriate marker and pan to location
+    this.bounce = function(venueItem) {
         google.maps.event.trigger(self.marker, 'click');
+        map.panTo(new google.maps.LatLng(self.lat, self.lng));
     };
 };
 
@@ -111,13 +115,14 @@ function viewModel() {
     });
 
     this.query = ko.observable('');
+    //Holds newly created Venues
     this.modelArray = ko.observableArray([]);
-
+    //Create venue from Venues template
     allVenues.forEach(function(venue) {
         self.modelArray.push(new Venues(venue));
     });
 
-    //Filter list of restaurants.  If the restaurant fails the if statement, remove pin
+    //Filter list of restaurants based on user input
     this.filteredList = ko.computed(function() {
         return self.modelArray().filter(function(venue) {
             var filtered = self.query().toLowerCase();
@@ -144,6 +149,6 @@ function startApp() {
 ko.applyBindings(new viewModel());
 }
 
-function anError() {
-    alert("Agh!");
+function errorHandler() {
+    alert("Error initializing Google Maps.");
 }
