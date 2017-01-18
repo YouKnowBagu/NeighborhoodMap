@@ -1,10 +1,56 @@
 'use strict';
 
 var map;
-// FourSquare keys
+//FourSquare info
 var clientID = "LNIAGQRXCOHRU0NUYS50R2KQC1SVITFKR1YRFXQ0XC5DOSHZ";
 var clientSecret = "1VN1YABW1IHLXRJKQSWZ5KWVRMJVSKQWR35IBDXSIITCXEZV";
+// Version date of FourSquare.  Stable as of this date.  Change at your own risk!
 var versionDate = "20170116";
+// infoWindow control, to close infoWindow when a new one is opened.
+var currentInfoWindow = null;
+
+var allVenues = [{
+    restaurantName: "Pago",
+    lat: 40.750139,
+    lng: -111.865595
+},
+{   restaurantName: "Mazza",
+    lat: 40.7515388,
+    lng: -111.866192
+},
+{
+    restaurantName:"Cafe Niche",
+    lat: 40.7631848,
+    lng: -111.8707216
+},
+{
+    restaurantName:"Publik Kitchen",
+    lat: 40.7500749,
+    lng: -111.8664014
+},{
+    restaurantName:"East Liberty Tap House",
+    lat: 40.749502,
+    lng: -111.8687297
+},{
+    restaurantName:"The Spaghetti Factory",
+    lat: 40.701906,
+    lng: -111.9781553
+},{
+    restaurantName:"Cafe Trio",
+    lat: 40.6946403,
+    lng: -111.9051617
+},
+{
+    restaurantName:"Current Fish and Oyster",
+    lat: 40.7631715,
+    lng: -111.8850539
+},
+{
+    restaurantName:"Rye",
+    lat: 40.7637479,
+    lng: -111.8785643
+}
+];
 
 var Venues = function(data) {
     var self = this;
@@ -13,21 +59,18 @@ var Venues = function(data) {
     this.number = "";
     this.lat = data.lat;
     this.lng = data.lng;
-    this.visible = ko.observable(true);
 
     var fourSquareUrl = "https://api.foursquare.com/v2/venues/search?client_id=" + clientID + "&client_secret=" + clientSecret + "&v=" + versionDate + "&ll=" + this.lat + "," + this.lng + ",&query=" + this.restaurantName;
 
     $.getJSON(fourSquareUrl).done(function(data) {
         var info = data.response.venues[0];
         self.address = info.location.formattedAddress;
+        if (info.contact.formattedPhone !== undefined) {
         self.number = info.contact.formattedPhone;
+    };
     });
 
-    this.contentString = "<div class='infoWindow'><div class='restaurantName'>" + data.restaurantName + "</div>" + "<div class='info'>" + self.address + "</div>" +
-        "<div class='info'>" + self.number + "</div></div>";
-
     this.infoWindow = new google.maps.InfoWindow({
-        content: self.contentString
     });
 
     this.marker = new google.maps.Marker({
@@ -35,14 +78,6 @@ var Venues = function(data) {
         map: map,
         name: data.restaurantName
     });
-    this.showMarker = ko.computed(function() {
-        if (this.visible() === true) {
-            this.marker.setMap(map);
-        } else {
-            this.marker.setMap(null);
-        }
-        return true;
-    }, this);
 
     this.marker.addListener('click', function() {
         self.contentString = '<div class="infoWindow"><div class="restaurantName"><b>' + data.restaurantName + "</b></div>" +
@@ -63,78 +98,9 @@ var Venues = function(data) {
         google.maps.event.trigger(self.marker, 'click');
     };
 };
-//Venue Model
-// var viewModel = {
-// 		venues:
-// 		[{
-// 			restaurantName: 'Utah State Capitol',
-// 			address: "Test address street road",
-// 			url: "www.website.com",
-// 			number:"404-404-4404"
-// 		},
-// 		{
-// 			restaurantName: "Red Butte Trail",
-// 			address: "Test address street road",
-// 			url: "www.website.com",
-// 			number:"404-404-4404"
-// 		},
-// 		{
-// 			restaurantName:"Sean's house",
-// 			address:"Sean's address",
-// 			url: "seanpsampson.com",
-// 			number: "404-404-4404"
-// 		}]
-// 	};
-// var self = this;
-//Stuff here
-
-
-
-// $.getJSON(fourSquareUrl).done(function(data) {
-// 	var results = data.response.venues[0];
-//
-// 	}
-// }).fail(function() {
-// 	alert("There was an error with the Foursquare API call. Please refresh the page and try again to load Foursquare data.");
-// });
-//
-// //TODO Determine InfoWindow content
-// this.content
-//
-// this.infoWindow = new google.maps.InfoWindow({content: self.content});
-//
-// this.marker = new google.maps.Marker({
-// 		//Marker Stuff here.  restaurantName, position, etc.
-// });
-
-
-
-// this.marker.addListener('click', function(){
-// 	//infoWindow content stuff here
-// 	,
-//
-//     self.infoWindow.setContent(self.content);
-//
-// 	self.infoWindow.open(map, this);
-//
-//
-// });
-// };
-
-// 	//Grab Map Element
-// this.mapElem = document.getElementById('map');
-// 	this.mapElem.style.height = window.innerHeight - 50;
-//     }
-var allVenues = [{
-    restaurantName: "Pago",
-    lat: 40.750139,
-    lng: -111.865595
-}];
 
 function viewModel() {
     var self = this;
-    this.Query = ko.observable('');
-    this.modelArray = ko.observableArray([]);
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: {
@@ -143,39 +109,39 @@ function viewModel() {
         },
         zoom: 14
     });
+
+    this.query = ko.observable('');
+    this.modelArray = ko.observableArray([]);
+
     allVenues.forEach(function(venue) {
         self.modelArray.push(new Venues(venue));
     });
+
+    //Filter list of restaurants.  If the restaurant fails the if statement, remove pin
     this.filteredList = ko.computed(function() {
-        var filter = self.Query().toLowerCase();
-        if (!filter) {
-            self.modelArray().forEach(function(venue) {
-                venue.visible(true);
-            });
-            return self.modelArray();
-        } else {
-            return ko.utils.arrayFilter(self.modelArray(), function(venue) {
-                var string = venue.restaurantName.toLowerCase();
-                var result = (string.search(filter) >= 0);
-                venue.visible(result);
-                return result;
-            });
-        }
-    }, self);
-
-
-    // self.searchResults = ko.computed(function() {
-    //     var q = self.Query();
-    //     return self.modelArray.forEach.filter(function(i) {
-    //       return i.restaurantName.toLowerCase().indexOf(q) >= 0;
-    //     });
-    //   });
-
-
+        return self.modelArray().filter(function(venue) {
+            var filtered = self.query().toLowerCase();
+            if (venue.restaurantName.toLowerCase().indexOf(filtered) >= 0) {
+                venue.marker.setMap(map);
+                venue.marker.addListener('click', function() {
+                    if (currentInfoWindow != null) {
+                        currentInfoWindow.close();
+                    }
+                venue.infoWindow.open(map, this);
+                currentInfoWindow = venue.infoWindow;
+                });
+                return true;
+            } else {
+                venue.marker.setMap(null);
+                return false;
+            }
+        });
+    });
 }
 
+//Callback for google maps is startApp, then apply bindings to viewwModel
 function startApp() {
-    ko.applyBindings(new viewModel());
+ko.applyBindings(new viewModel());
 }
 
 function anError() {

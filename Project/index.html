@@ -9,7 +9,7 @@
     <body>
         <div class="body-container">
             <aside>
-                <input class="form-control" name="q" data-bind="value: Query, valueUpdate: 'keyup'" autocomplete="off">
+                <input class="form-control" name="q" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off">
                 <h3>Search results:</h3>
                 <ul data-bind="foreach: filteredList">
                     <li data-bind="text: restaurantName"></li>
@@ -21,13 +21,12 @@
             </aside>
             <section>
                 <div class="map" id="map"></div>
-                <div class="infoWindow"></div>
             </section>
         </div>
         <script src='js/knockout.min.js'></script>
         <script src='js/jquery.min.js'></script>
         <script src='js/app.js'></script>
         <!-- #TODO Update callback -->
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4cTV36HIs_yuVqBmPPlf41PVU4P9-GKk&callback=startApp" onerror="anError()"></script>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4cTV36HIs_yuVqBmPPlf41PVU4P9-GKk&callback=startApp" onerror="anError()" type="text/javascript"></script>
     </body>
 </html>
